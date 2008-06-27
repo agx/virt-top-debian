@@ -1,0 +1,19 @@
+Source: virt-top
+Section: admin
+Priority: extra
+Maintainer: Guido Guenther <agx@sigxcpu.org>
+Build-Depends: cdbs, debhelper (>= 6), autotools-dev, ocaml-nox, ocaml-findlib, quilt
+ libvirt-ocaml-dev, libcurses-ocaml-dev, libcsv-ocaml-dev, libgettext-ocaml-dev, libxml-light-ocaml-dev
+Standards-Version: 3.7.3
+Homepage: http://et.redhat.com/~rjones/virt-top/
+
+Package: virt-top
+Architecture: any
+Depends: ocaml-base-nox-${F:OCamlABI}, ${shlibs:Depends}
+Description: show stats of virtualized domains
+ virt-top is modelled after the "ordinary" top utility and many keys and
+ command line options are the same.
+ .
+ It uses libvirt so it capable of showing stats across a variety of
+ different virtualization systems.
+
