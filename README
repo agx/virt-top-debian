@@ -1,0 +1,25 @@
+virt-top
+----------------------------------------------------------------------
+
+Copyright (C) 2007-2008 Richard W.M. Jones, Red Hat Inc.
+http://et.redhat.com/~rjones/virt-top/
+http://libvirt.org/ocaml/
+http://libvirt.org/
+
+virt-top is a top-like utility for showing stats of virtualized
+domains. Many keys and command line options are the same as for
+ordinary top.
+
+It uses libvirt so it capable of showing stats across a variety of
+different virtualization systems.
+
+
+Building
+----------------------------------------------------------------------
+
+  ./configure           # Checks that you have all the required bits.
+
+  make all		# Builds the bytecode version of the program.
+  make opt		# Builds the native code version of the program.
+
+Then have a look at the program 'virt-top/virt-top.opt'.
