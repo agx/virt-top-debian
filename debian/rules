@@ -17,6 +17,10 @@ DEB_MAKE_INSTALL_TARGET  := install-byte
 endif
 DEB_MAKE_INSTALL_TARGET  += DESTDIR="$(DESTDIR)"
 
+clean::
+	rm -f Make.rules Makefile config.h config.log config.status \
+	      po/Makefile virt-top/Makefile virt-top/virt_top_gettext.ml
+
 redo-patches::
 	rm -f debian/patches/*
 	git format-patch -N -o debian/patches master...patch-queue | \
