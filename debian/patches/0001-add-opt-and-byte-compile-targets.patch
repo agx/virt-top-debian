@@ -1,0 +1,48 @@
+From e798f0eee739f2e173a8cb50bb6482a9da03e1ae Mon Sep 17 00:00:00 2001
+From: Guido Guenther <agx@sigxcpu.org>
+Date: Wed, 23 Jul 2008 17:30:49 -0400
+Subject: [PATCH] add opt and byte compile targets
+
+---
+ Makefile.in          |    2 +-
+ virt-top/Makefile.in |    8 +++++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 1793bfc..4ef167a 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -24,7 +24,7 @@ MAKENSIS	= @MAKENSIS@
+ 
+ SUBDIRS		= virt-top
+ 
+-all opt depend install:
++all opt depend install-opt install-byte:
+ 	for d in $(SUBDIRS); do \
+ 	  $(MAKE) -C $$d $@; \
+ 	  if [ $$? -ne 0 ]; then exit 1; fi; \
+diff --git a/virt-top/Makefile.in b/virt-top/Makefile.in
+index e471f93..ed6f57c 100755
+--- a/virt-top/Makefile.in
++++ b/virt-top/Makefile.in
+@@ -95,10 +95,16 @@ virt-top.txt: virt-top.pod
+ 	pod2text $< > $@
+ endif
+ 
+-install:
++install-opt:
+ 	if [ -x virt-top.opt ]; then \
+ 	  mkdir -p $(DESTDIR)$(bindir); \
+ 	  $(INSTALL) -m 0755 virt-top.opt $(DESTDIR)$(bindir)/virt-top; \
+ 	fi
+ 
++install-byte:
++	if [ -x virt-top ]; then \
++	  mkdir -p $(DESTDIR)$(bindir); \
++	  $(INSTALL) -m 0755 virt-top $(DESTDIR)$(bindir)/virt-top; \
++	fi
++
+ include ../Make.rules
+-- 
+1.5.6.3
+
