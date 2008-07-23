@@ -1,3 +1,13 @@
+virt-top (1.0.2-1) unstable; urgency=low
+
+  * [ef74dca] new upstream version 1.0.2
+  * [0ea43a3] adjust add-opt-and-byte targets patch to new upstream version
+  * [7f39818] debian/rules: remove files generated during build
+  * [86fdc8b] debian/rules: add redo-patches target
+  * [9088360] add watch file
+
+ -- Guido Guenther <agx@sigxcpu.org>  Wed, 23 Jul 2008 18:00:03 -0400
+
 virt-top (1.0.1-1) unstable; urgency=low
 
   * Initial release (Closes: #453955)
