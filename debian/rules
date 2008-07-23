@@ -17,3 +17,7 @@ DEB_MAKE_INSTALL_TARGET  := install-byte
 endif
 DEB_MAKE_INSTALL_TARGET  += DESTDIR="$(DESTDIR)"
 
+redo-patches::
+	rm -f debian/patches/*
+	git format-patch -N -o debian/patches master...patch-queue | \
+		sed -e 's%debian/patches/%%' > debian/patches/series
