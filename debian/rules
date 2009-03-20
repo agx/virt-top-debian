@@ -2,7 +2,7 @@
   
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
-include /usr/share/cdbs/1/class/ocaml.mk
+include /usr/share/cdbs/1/rules/ocaml.mk
 include /usr/share/cdbs/1/rules/patchsys-quilt.mk
 
 DESTDIR=$(CURDIR)/debian/virt-top

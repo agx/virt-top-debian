@@ -2,8 +2,18 @@ Source: virt-top
 Section: admin
 Priority: extra
 Maintainer: Guido Guenther <agx@sigxcpu.org>
-Build-Depends: cdbs, debhelper (>= 6), autotools-dev, ocaml-nox, ocaml-findlib, quilt,
- libvirt-ocaml-dev, libcurses-ocaml-dev, libcsv-ocaml-dev, libgettext-ocaml-dev, libxml-light-ocaml-dev
+Build-Depends: cdbs, 
+ debhelper (>= 7), 
+ autotools-dev, 
+ ocaml-nox, 
+ ocaml-findlib, 
+ quilt,
+ libvirt-ocaml-dev (>= 0.4.4.2), 
+ libcurses-ocaml-dev, 
+ libcsv-ocaml-dev, 
+ libgettext-ocaml-dev, 
+ libxml-light-ocaml-dev,
+ dh-ocaml (>= 0.4.1)
 Standards-Version: 3.7.3
 Homepage: http://et.redhat.com/~rjones/virt-top/
 
