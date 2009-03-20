@@ -1,5 +1,13 @@
+virt-top (1.0.2-2+nmu1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add dh-ocaml build-dependency (rules/ocaml.mk)
+
+ -- Sylvain Le Gall <gildor@debian.org>  Fri, 20 Mar 2009 12:52:49 +0100
+
 virt-top (1.0.2-2) unstable; urgency=low
 
+  [ Guido Guenther ]
   * [a7cbb9d] fix build dependencies
 
  -- Guido Guenther <agx@sigxcpu.org>  Sat, 02 Aug 2008 03:15:55 +0200
