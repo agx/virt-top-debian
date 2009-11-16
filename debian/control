@@ -21,7 +21,7 @@ Homepage: http://et.redhat.com/~rjones/virt-top/
 
 Package: virt-top
 Architecture: any
-Depends: ocaml-base-nox-${F:OCamlABI}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, ocaml-base-nox-${F:OCamlABI}
 Description: show stats of virtualized domains
  virt-top is modelled after the "ordinary" top utility and many keys and
  command line options are the same.
