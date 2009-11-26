@@ -1,3 +1,9 @@
+virt-top (1.0.3-1) UNRELEASED; urgency=low
+
+  * New upstream release 
+
+ -- Sylvain Le Gall <gildor@debian.org>  Fri, 27 Nov 2009 00:01:31 +0100
+
 virt-top (1.0.2-2+nmu1) unstable; urgency=low
 
   * Non-maintainer upload.
