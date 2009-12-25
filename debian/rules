@@ -5,23 +5,18 @@ include /usr/share/cdbs/1/class/autotools.mk
 include /usr/share/cdbs/1/rules/ocaml.mk
 include /usr/share/cdbs/1/rules/patchsys-quilt.mk
 
-DESTDIR=$(CURDIR)/debian/virt-top
+DESTDIR = $(CURDIR)/debian/virt-top
 
-DEB_MAKE_CLEAN_TARGET    := clean
+DEB_MAKE_CLEAN_TARGET    = clean
 ifeq ($(OCAML_HAVE_OCAMLOPT),yes)
-DEB_MAKE_BUILD_TARGET    := opt
-DEB_MAKE_INSTALL_TARGET  := install-opt
+DEB_MAKE_BUILD_TARGET    = opt
+DEB_MAKE_INSTALL_TARGET  = install-opt
 else
-DEB_MAKE_BUILD_TARGET    := all
-DEB_MAKE_INSTALL_TARGET  := install-byte
+DEB_MAKE_BUILD_TARGET    = all
+DEB_MAKE_INSTALL_TARGET  = install-byte
 endif
 DEB_MAKE_INSTALL_TARGET  += DESTDIR="$(DESTDIR)"
 
 clean::
 	rm -f Make.rules Makefile config.h config.log config.status \
 	      po/Makefile virt-top/Makefile virt-top/virt_top_gettext.ml
-
-redo-patches::
-	rm -f debian/patches/*
-	git format-patch -N -o debian/patches master...patch-queue | \
-		sed -e 's%debian/patches/%%' > debian/patches/series
