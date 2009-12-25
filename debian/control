@@ -2,6 +2,7 @@ Source: virt-top
 Section: admin
 Priority: extra
 Maintainer: Guido Günther <agx@sigxcpu.org>
+Uploaders: Laurent Léonard <laurent@open-minds.org>
 Build-Depends: cdbs, 
  debhelper (>= 7), 
  autotools-dev, 
@@ -18,6 +19,7 @@ Standards-Version: 3.8.3
 Vcs-Git: git://git.debian.org/pkg-ocaml-maint/packages/virt-top.git
 Vcs-Browser: http://git.debian.org/?p=pkg-ocaml-maint/packages/virt-top.git
 Homepage: http://et.redhat.com/~rjones/virt-top/
+DM-Upload-Allowed: yes
 
 Package: virt-top
 Architecture: any
