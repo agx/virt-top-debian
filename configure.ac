@@ -17,7 +17,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(virt-top,1.0.3)
+AC_INIT(virt-top,1.0.4)
 
 AC_PROG_INSTALL
 
@@ -77,6 +77,9 @@ AC_CHECK_PROG(HAVE_PERLDOC,perldoc,perldoc)
 
 dnl Check for recommended ocaml-gettext tool.
 AC_CHECK_PROG(OCAML_GETTEXT,ocaml-gettext,ocaml-gettext)
+
+dnl Check for msgfmt tool.
+AC_CHECK_PROG(MSGFMT,msgfmt,msgfmt)
 
 dnl Check for optional NSIS (for building a Windows installer).
 dnl XXX NSIS support is probably broken at the moment XXX
