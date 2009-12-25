@@ -8,7 +8,7 @@ Subject: [PATCH] add opt and byte compile targets
  2 files changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile.in b/Makefile.in
-index 1793bfc..4ef167a 100644
+index c1a9f56..d7984e0 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -24,7 +24,7 @@ MAKENSIS	= @MAKENSIS@
@@ -21,7 +21,7 @@ index 1793bfc..4ef167a 100644
  	  $(MAKE) -C $$d $@; \
  	  if [ $$? -ne 0 ]; then exit 1; fi; \
 diff --git a/virt-top/Makefile.in b/virt-top/Makefile.in
-index e471f93..ed6f57c 100755
+index 2eedf89..ef318ad 100755
 --- a/virt-top/Makefile.in
 +++ b/virt-top/Makefile.in
 @@ -95,10 +95,16 @@ virt-top.txt: virt-top.pod
