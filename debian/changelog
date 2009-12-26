@@ -1,9 +1,16 @@
-virt-top (1.0.3-1) UNRELEASED; urgency=low
+virt-top (1.0.4-1) unstable; urgency=low
 
+  [ Sylvain Le Gall ]
   * New upstream release 
   * Use dh-ocaml features
 
- -- Sylvain Le Gall <gildor@debian.org>  Fri, 27 Nov 2009 00:01:31 +0100
+  [ Laurent Léonard ]
+  * [ace531c] Imported Upstream version 1.0.4
+  * [99145f2] Clean debian/rules.
+  * [3baed57] Allow DM upload and add myself as uploader.
+  * [ae48bd8] Redo patch 0001-add-opt-and-byte-compile-targets.patch.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 26 Dec 2009 17:05:14 +0100
 
 virt-top (1.0.2-2+nmu1) unstable; urgency=low
 
