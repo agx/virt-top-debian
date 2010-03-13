@@ -2,8 +2,9 @@ virt-top (1.0.4-2) unstable; urgency=low
 
   * [9ed2d18] Add build dependency on libextlib-ocaml-dev. (Closes:
     #573651)
+  * [8ed549b] Bump Standards-Version to 3.8.4.
 
- -- Laurent Léonard <laurent@open-minds.org>  Sat, 13 Mar 2010 23:15:51 +0100
+ -- Laurent Léonard <laurent@open-minds.org>  Sat, 13 Mar 2010 23:24:12 +0100
 
 virt-top (1.0.4-1) unstable; urgency=low
 
