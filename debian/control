@@ -16,7 +16,7 @@ Build-Depends: cdbs,
  libxml-light-ocaml-dev,
  dh-ocaml (>= 0.9.1),
  libextlib-ocaml-dev
-Standards-Version: 3.8.3
+Standards-Version: 3.8.4
 Vcs-Git: git://git.debian.org/pkg-ocaml-maint/packages/virt-top.git
 Vcs-Browser: http://git.debian.org/?p=pkg-ocaml-maint/packages/virt-top.git
 Homepage: http://et.redhat.com/~rjones/virt-top/
