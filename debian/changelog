@@ -1,3 +1,11 @@
+virt-top (1.0.5-1) unstable; urgency=low
+
+  * [ba445bb] Imported Upstream version 1.0.5
+  * [aa3c6e8] Remove debian/docs
+  * [93caddc] Bump Standards-Version to 3.9.1
+
+ -- Laurent Léonard <laurent@open-minds.org>  Wed, 16 Feb 2011 10:26:08 +0100
+
 virt-top (1.0.4-2) unstable; urgency=low
 
   * [9ed2d18] Add build dependency on libextlib-ocaml-dev. (Closes:
