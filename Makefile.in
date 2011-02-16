@@ -1,5 +1,5 @@
 # virt-top
-# Copyright (C) 2007-2008 Red Hat Inc., Richard W.M. Jones
+# Copyright (C) 2007-2009 Red Hat Inc., Richard W.M. Jones
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -41,20 +41,6 @@ distclean: clean
 	rm -rf autom4te.cache
 	rm -f Makefile
 	rm -f virt-top/Makefile
-
-# Windows installer (requires NSIS).
-
-WININSTALLER := $(PACKAGE)-$(VERSION).exe
-
-ifneq ($(MAKENSIS),)
-wininstaller: $(WININSTALLER)
-
-$(WININSTALLER): wininstaller.nsis all opt
-	"$(MAKENSIS)" \
-	  //DPACKAGE=$(PACKAGE) //DVERSION=$(VERSION) \
-	  //DOUTFILE=$@ $<
-	ls -l $@
-endif
 
 # Distribution.
 
