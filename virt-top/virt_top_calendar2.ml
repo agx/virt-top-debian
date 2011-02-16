@@ -1,5 +1,5 @@
 (* 'top'-like tool for libvirt domains.
-   (C) Copyright 2007 Richard W.M. Jones, Red Hat Inc.
+   (C) Copyright 2007-2009 Richard W.M. Jones, Red Hat Inc.
    http://libvirt.org/
 
    This program is free software; you can redistribute it and/or modify
@@ -51,5 +51,8 @@ fun time ->
 
   eprintf "end time: %s\n" (Printer.CalendarPrinter.to_string cal);
 
-  (* Convert to a time_t, adjusting for the current timezone. *)
-  fst (Unix.mktime (Calendar.to_unixtm cal))
+  (* Convert to a time_t.  Note that we compare this against
+   * Unix.gettimeofday in the main module, so this must be returned as
+   * plain seconds from 1970 with no timezone adjustment.  (RHBZ#637964)
+   *)
+  Calendar.to_unixfloat cal

@@ -1,5 +1,5 @@
 (* 'top'-like tool for libvirt domains.
-   (C) Copyright 2007 Richard W.M. Jones, Red Hat Inc.
+   (C) Copyright 2007-2009 Richard W.M. Jones, Red Hat Inc.
    http://libvirt.org/
 
    This program is free software; you can redistribute it and/or modify
@@ -34,6 +34,9 @@ let (+^) = Int64.add
 let (-^) = Int64.sub
 let ( *^ ) = Int64.mul
 let (/^) = Int64.div
+
+(* failwithf is a printf-like version of failwith. *)
+let failwithf fs = ksprintf failwith fs
 
 (* Input a whole file as a list of lines. *)
 let input_all_lines chan =
@@ -106,10 +109,13 @@ let read_config_file filename =
 
 (* Pad a string to the full width with spaces.  If too long, truncate. *)
 let pad width str =
-  let n = String.length str in
-  if n = width then str
-  else if n > width then String.sub str 0 width
-  else (* if n < width then *) str ^ String.make (width-n) ' '
+  if width <= 0 then ""
+  else (
+    let n = String.length str in
+    if n = width then str
+    else if n > width then String.sub str 0 width
+    else (* if n < width then *) str ^ String.make (width-n) ' '
+  )
 
 module Show = struct
   (* Show a percentage in 4 chars. *)
