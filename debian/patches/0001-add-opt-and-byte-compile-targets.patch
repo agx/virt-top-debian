@@ -1,6 +1,6 @@
 From: Guido Guenther <agx@sigxcpu.org>
 Date: Wed, 23 Jul 2008 17:30:49 -0400
-Subject: [PATCH] add opt and byte compile targets
+Subject: add opt and byte compile targets
 
 ---
  Makefile.in          |    2 +-
@@ -8,7 +8,7 @@ Subject: [PATCH] add opt and byte compile targets
  2 files changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile.in b/Makefile.in
-index c1a9f56..d7984e0 100644
+index beacf76..c2d2ff3 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -24,7 +24,7 @@ MAKENSIS	= @MAKENSIS@
@@ -21,10 +21,10 @@ index c1a9f56..d7984e0 100644
  	  $(MAKE) -C $$d $@; \
  	  if [ $$? -ne 0 ]; then exit 1; fi; \
 diff --git a/virt-top/Makefile.in b/virt-top/Makefile.in
-index 2eedf89..ef318ad 100755
+index 34f1ad6..474eb08 100755
 --- a/virt-top/Makefile.in
 +++ b/virt-top/Makefile.in
-@@ -95,10 +95,16 @@ virt-top.txt: virt-top.pod
+@@ -100,10 +100,16 @@ virt-top.txt: virt-top.pod
  	pod2text $< > $@
  endif
  
