@@ -126,14 +126,17 @@ let uri = ref None
 let debug_file = ref ""
 let csv_enabled = ref false
 let csv_cpu = ref true
+let csv_mem = ref true
 let csv_block = ref true
 let csv_net = ref true
 let init_file = ref DefaultInitFile
 let script_mode = ref false
+let stream_mode = ref false
+let block_in_bytes = ref false
 
 (* Tuple of never-changing data returned by start_up function. *)
 type setup =
-    Libvirt.ro C.t * bool * bool * bool * C.node_info * string *
+    Libvirt.ro C.t * bool * bool * bool * bool * C.node_info * string *
       (int * int * int)
 
 (* Function to read command line arguments and go into curses mode. *)
@@ -169,13 +172,15 @@ let start_up () =
     "-b", Arg.Set batch_mode,
       " " ^ s_"Batch mode";
     "-c", Arg.String set_uri,
-      "uri " ^ s_"Connect to URI (default: Xen)";
+      "uri " ^ s_"Connect to libvirt URI";
     "--connect", Arg.String set_uri,
-      "uri " ^ s_"Connect to URI (default: Xen)";
+      "uri " ^ s_"Connect to libvirt URI";
     "--csv", Arg.String set_csv,
       "file " ^ s_"Log statistics to CSV file";
     "--no-csv-cpu", Arg.Clear csv_cpu,
       " " ^ s_"Disable CPU stats in CSV";
+    "--no-csv-mem", Arg.Clear csv_mem,
+      " " ^ s_"Disable memory stats in CSV";
     "--no-csv-block", Arg.Clear csv_block,
       " " ^ s_"Disable block device stats in CSV";
     "--no-csv-net", Arg.Clear csv_net,
@@ -200,6 +205,10 @@ let start_up () =
       " " ^ s_"Secure (\"kiosk\") mode";
     "--script", Arg.Set script_mode,
       " " ^ s_"Run from a script (no user interface)";
+    "--stream", Arg.Set stream_mode,
+      " " ^ s_"dump output to stdout (no userinterface)";
+    "--block-in-bytes", Arg.Set block_in_bytes,
+      " " ^ s_"show block device load in bytes rather than reqs";
     "--version", Arg.Unit display_version,
       " " ^ s_"Display version number and exit";
   ] in
@@ -227,11 +236,14 @@ OPTIONS" in
       | _, "debug", filename -> debug_file := filename
       | _, "csv", filename -> set_csv filename
       | _, "csv-cpu", b -> csv_cpu := bool_of_string b
+      | _, "csv-mem", b -> csv_mem := bool_of_string b
       | _, "csv-block", b -> csv_block := bool_of_string b
       | _, "csv-net", b -> csv_net := bool_of_string b
       | _, "batch", b -> batch_mode := bool_of_string b
       | _, "secure", b -> secure_mode := bool_of_string b
       | _, "script", b -> script_mode := bool_of_string b
+      | _, "stream", b -> stream_mode := bool_of_string b
+      | _, "block-in-bytes", b -> block_in_bytes := bool_of_string b
       | _, "end-time", t -> set_end_time t
       | _, "overwrite-init-file", "false" -> no_init_file ()
       | lineno, key, _ ->
@@ -260,7 +272,7 @@ OPTIONS" in
 	prerr_endline (Libvirt.Virterror.to_string err);
 	(* If non-root and no explicit connection URI, print a warning. *)
 	if Unix.geteuid () <> 0 && name = None then (
-	  print_endline (s_"NB: If you want to monitor a local Xen hypervisor, you usually need to be root");
+	  print_endline (s_"NB: If you want to monitor a local hypervisor, you usually need to be root");
 	);
 	exit 1 in
 
@@ -287,7 +299,7 @@ OPTIONS" in
    | "" -> (* No debug file specified, send stderr to /dev/null unless
 	    * we're in script mode.
 	    *)
-       if not !script_mode then (
+       if not !script_mode && not !stream_mode then (
 	 let fd = Unix.openfile "/dev/null" [Unix.O_WRONLY] 0o644 in
 	 Unix.dup2 fd Unix.stderr;
 	 Unix.close fd
@@ -301,7 +313,7 @@ OPTIONS" in
   );
 
   (* Curses voodoo (see ncurses(3)). *)
-  if not !script_mode then (
+  if not !script_mode && not !stream_mode then (
     ignore (initscr ());
     ignore (cbreak ());
     ignore (noecho ());
@@ -317,7 +329,7 @@ OPTIONS" in
    * main_loop.  See virt_top_main.ml.
    *)
   (conn,
-   !batch_mode, !script_mode, !csv_enabled, (* immutable modes *)
+   !batch_mode, !script_mode, !csv_enabled, !stream_mode, (* immutable modes *)
    node_info, hostname, libvirt_version (* info that doesn't change *)
   )
 
@@ -335,7 +347,7 @@ let show_state = function
 let sleep = Unix.sleep
 
 (* Sleep in milliseconds. *)
-let usleep n =
+let millisleep n =
   ignore (Unix.select [] [] [] (float n /. 1000.))
 
 (* The curses getstr/getnstr functions are just weird.
@@ -394,9 +406,17 @@ and rd_active = {
   (* The following are since the last slice, or 0 if cannot be calculated: *)
   rd_cpu_time : float;			(* CPU time used in nanoseconds. *)
   rd_percent_cpu : float;		(* CPU time as percent of total. *)
+  rd_mem_bytes : int64;		        (* Memory usage in bytes *)
+  rd_mem_percent: int64;		(* Memory usage as percent of total *)
   (* The following are since the last slice, or None if cannot be calc'd: *)
   rd_block_rd_reqs : int64 option;      (* Number of block device read rqs. *)
   rd_block_wr_reqs : int64 option;      (* Number of block device write rqs. *)
+  rd_block_rd_bytes : int64 option;   (* Number of bytes block device read *)
+  rd_block_wr_bytes : int64 option;   (* Number of bytes block device write *)
+  (* _info fields includes the number considering --block_in_bytes option *)
+  rd_block_rd_info : int64 option;    (* Block device read info for user *)
+  rd_block_wr_info : int64 option;    (* Block device read info for user *)
+
   rd_net_rx_bytes : int64 option;	(* Number of bytes received. *)
   rd_net_tx_bytes : int64 option;	(* Number of bytes transmitted. *)
 }
@@ -436,7 +456,7 @@ let collect, clear_pcpu_display_data =
     Hashtbl.clear last_vcpu_info
   in
 
-  let collect (conn, _, _, _, node_info, _, _) =
+  let collect (conn, _, _, _, _, node_info, _, _) =
     (* Number of physical CPUs (some may be disabled). *)
     let nr_pcpus = C.maxcpus_of_node_info node_info in
 
@@ -496,7 +516,10 @@ let collect, clear_pcpu_display_data =
 		      rd_prev_block_stats = prev_block_stats;
 		      rd_prev_interface_stats = prev_interface_stats;
 		      rd_cpu_time = 0.; rd_percent_cpu = 0.;
+                      rd_mem_bytes = 0L; rd_mem_percent = 0L;
 		      rd_block_rd_reqs = None; rd_block_wr_reqs = None;
+                      rd_block_rd_bytes = None; rd_block_wr_bytes = None;
+                      rd_block_rd_info = None; rd_block_wr_info = None;
 		      rd_net_rx_bytes = None; rd_net_tx_bytes = None;
 		    })
 	    with
@@ -528,9 +551,14 @@ let collect, clear_pcpu_display_data =
 	    let cpu_time =
 	      Int64.to_float (rd.rd_info.D.cpu_time -^ prev_info.D.cpu_time) in
 	    let percent_cpu = 100. *. cpu_time /. total_cpu in
+            let mem_usage = rd.rd_info.D.memory in
+            let mem_percent =
+                100L *^ rd.rd_info.D.memory /^ node_info.C.memory in
 	    let rd = { rd with
 			 rd_cpu_time = cpu_time;
-			 rd_percent_cpu = percent_cpu } in
+			 rd_percent_cpu = percent_cpu;
+			 rd_mem_bytes = mem_usage;
+                         rd_mem_percent = mem_percent} in
 	    name, Active rd
 	(* For all other domains we can't calculate it, so leave as 0 *)
 	| rd -> rd
@@ -558,10 +586,23 @@ let collect, clear_pcpu_display_data =
 	      block_stats.D.rd_req -^ prev_block_stats.D.rd_req in
 	    let write_reqs =
 	      block_stats.D.wr_req -^ prev_block_stats.D.wr_req in
+            let read_bytes =
+              block_stats.D.rd_bytes -^ prev_block_stats.D.rd_bytes in
+            let write_bytes =
+              block_stats.D.wr_bytes -^ prev_block_stats.D.wr_bytes in
 
 	    let rd = { rd with
 			 rd_block_rd_reqs = Some read_reqs;
-			 rd_block_wr_reqs = Some write_reqs } in
+			 rd_block_wr_reqs = Some write_reqs;
+                         rd_block_rd_bytes = Some read_bytes;
+                         rd_block_wr_bytes = Some write_bytes;
+            } in
+            let rd = { rd with
+                         rd_block_rd_info = if !block_in_bytes then
+                         rd.rd_block_rd_bytes else rd.rd_block_rd_reqs;
+                         rd_block_wr_info = if !block_in_bytes then
+                         rd.rd_block_wr_bytes else rd.rd_block_wr_reqs;
+            } in
 	    name, Active rd
 	(* For all other domains we can't calculate it, so leave as None. *)
 	| rd -> rd
@@ -746,7 +787,7 @@ let redraw =
   let historical_cpu = ref [] in
   let historical_cpu_last_time = ref (Unix.gettimeofday ()) in
   fun
-  (_, _, _, _, node_info, _, _) (* setup *)
+  (_, _, _, _, _, node_info, _, _) (* setup *)
   (doms,
    time, printable_time,
    nr_pcpus, total_cpu, total_cpu_per_pcpu,
@@ -845,8 +886,12 @@ let redraw =
 
 	 (* Print domains. *)
 	 attron A.reverse;
-	 mvaddstr header_lineno 0
-	   (pad cols "   ID S RDRQ WRRQ RXBY TXBY %CPU %MEM    TIME   NAME");
+         let header_string = if !block_in_bytes
+         then "   ID S RDBY WRBY RXBY TXBY %CPU %MEM    TIME   NAME"
+         else "   ID S RDRQ WRRQ RXBY TXBY %CPU %MEM    TIME   NAME"
+         in
+	   mvaddstr header_lineno 0
+	    (pad cols header_string);
 	 attroff A.reverse;
 
 	 let rec loop lineno = function
@@ -854,14 +899,12 @@ let redraw =
 	   | (name, Active rd) :: doms ->
 	       if lineno < lines then (
 		 let state = show_state rd.rd_info.D.state in
-		 let rd_req = Show.int64_option rd.rd_block_rd_reqs in
-		 let wr_req = Show.int64_option rd.rd_block_wr_reqs in
+		 let rd_req = Show.int64_option rd.rd_block_rd_info in
+		 let wr_req = Show.int64_option rd.rd_block_wr_info in
 		 let rx_bytes = Show.int64_option rd.rd_net_rx_bytes in
 		 let tx_bytes = Show.int64_option rd.rd_net_tx_bytes in
 		 let percent_cpu = Show.percent rd.rd_percent_cpu in
-		 let percent_mem =
-		   100L *^ rd.rd_info.D.memory /^ node_info.C.memory in
-		 let percent_mem = Int64.to_float percent_mem in
+		 let percent_mem = Int64.to_float rd.rd_mem_percent in
 		 let percent_mem = Show.percent percent_mem in
 		 let time = Show.time rd.rd_info.D.cpu_time in
 
@@ -1199,13 +1242,17 @@ let write_csv_header () =
       (* These fields are repeated for each domain: *)
     [ "Domain ID"; "Domain name"; ] @
     (if !csv_cpu then [ "CPU (ns)"; "%CPU"; ] else []) @
-    (if !csv_block then [ "Block RDRQ"; "Block WRRQ"; ] else []) @
+    (if !csv_mem then [ "Mem (bytes)"; "%Mem";] else []) @
+    (if !csv_block && not !block_in_bytes
+       then [ "Block RDRQ"; "Block WRRQ"; ] else []) @
+    (if !csv_block && !block_in_bytes
+       then [ "Block RDBY"; "Block WRBY"; ] else []) @
     (if !csv_net then [ "Net RXBY"; "Net TXBY" ] else [])
   )
 
 (* Write summary data to CSV file. *)
 let append_csv
-    (_, _, _, _, node_info, hostname, _) (* setup *)
+    (_, _, _, _, _, node_info, hostname, _) (* setup *)
     (doms,
      _, printable_time,
      nr_pcpus, total_cpu, _,
@@ -1253,9 +1300,12 @@ let append_csv
 	(if !csv_cpu then [
 	   string_of_float rd.rd_cpu_time; string_of_float rd.rd_percent_cpu
 	 ] else []) @
+        (if !csv_mem then [
+            Int64.to_string rd.rd_mem_bytes; Int64.to_string rd.rd_mem_percent
+         ] else []) @
 	(if !csv_block then [
-	   string_of_int64_option rd.rd_block_rd_reqs;
-	   string_of_int64_option rd.rd_block_wr_reqs;
+	   string_of_int64_option rd.rd_block_rd_info;
+	   string_of_int64_option rd.rd_block_wr_info;
 	 ] else []) @
 	(if !csv_net then [
 	   string_of_int64_option rd.rd_net_rx_bytes;
@@ -1266,22 +1316,77 @@ let append_csv
 
   (!csv_write) (summary_fields @ domain_fields)
 
+let dump_stdout
+    (_, _, _, _, _, node_info, hostname, _) (* setup *)
+    (doms,
+     _, printable_time,
+     nr_pcpus, total_cpu, _,
+     totals,
+     _) (* state *) =
+
+  (* Header for this iteration *)
+  printf "virt-top time  %s Host %s %s %d/%dCPU %dMHz %LdMB \n"
+    printable_time hostname node_info.C.model node_info.C.cpus nr_pcpus
+    node_info.C.mhz (node_info.C.memory /^ 1024L);
+  (* dump domain information one by one *)
+   let rd, wr = if !block_in_bytes then "RDBY", "WRBY" else "RDRQ", "WRRQ"
+   in
+     printf "   ID S %s %s RXBY TXBY %%CPU %%MEM   TIME    NAME\n" rd wr;
+
+  (* sort by ID *)
+  let doms =
+    let compare =
+      (function
+       | Active {rd_domid = id1 }, Active {rd_domid = id2} ->
+           compare id1 id2
+       | Active _, Inactive -> -1
+       | Inactive, Active _ -> 1
+       | Inactive, Inactive -> 0)
+    in
+    let cmp  (name1, dom1) (name2, dom2) = compare(dom1, dom2) in
+    List.sort ~cmp doms in
+  (*Print domains *)
+  let dump_domain = fun name rd
+  -> begin
+    let state = show_state rd.rd_info.D.state in
+         let rd_req = if rd.rd_block_rd_info = None then "   0"
+                      else Show.int64_option rd.rd_block_rd_info in
+         let wr_req = if rd.rd_block_wr_info = None then "   0"
+                      else Show.int64_option rd.rd_block_wr_info in
+    let rx_bytes = if rd.rd_net_rx_bytes = None then "   0"
+    else Show.int64_option rd.rd_net_rx_bytes in
+    let tx_bytes = if rd.rd_net_tx_bytes = None then "   0"
+    else Show.int64_option rd.rd_net_tx_bytes in
+    let percent_cpu = Show.percent rd.rd_percent_cpu in
+    let percent_mem = Int64.to_float rd.rd_mem_percent in
+    let percent_mem = Show.percent percent_mem in
+    let time = Show.time rd.rd_info.D.cpu_time in
+    printf "%5d %c %s %s %s %s %s %s %s %s\n"
+      rd.rd_domid state rd_req wr_req rx_bytes tx_bytes
+      percent_cpu percent_mem time name;
+  end
+  in
+  List.iter (
+    function
+    | name, Active dom -> dump_domain name dom
+    | name, Inactive -> ()
+  ) doms;
+  flush stdout
+
 (* Main loop. *)
-let rec main_loop ((_, batch_mode, script_mode, csv_enabled, _, _, _)
+let rec main_loop ((_, batch_mode, script_mode, csv_enabled, stream_mode, _, _, _)
 		     as setup) =
   if csv_enabled then write_csv_header ();
 
   while not !quit do
     let state = collect setup in	        (* Collect stats. *)
-    if not script_mode then redraw setup state; (* Redraw display. *)
+    (* Redraw display. *)
+    if not script_mode && not stream_mode then redraw setup state;
     if csv_enabled then append_csv setup state; (* Update CSV file. *)
+    if stream_mode then dump_stdout setup state; (* dump to stdout *)
 
     (* Clear up unused virDomainPtr objects. *)
     Gc.compact ();
-
-    (* Get next key.  This does the sleep. *)
-    if not batch_mode && not script_mode then
-      get_key_press setup;
 
     (* Max iterations? *)
     if !iterations >= 0 then (
@@ -1289,26 +1394,42 @@ let rec main_loop ((_, batch_mode, script_mode, csv_enabled, _, _, _)
       if !iterations = 0 then quit := true
     );
 
-    (* End time? *)
-    (match !end_time with
-     | None -> ()
-     | Some end_time ->
-	 let (_, time, _, _, _, _, _, _) = state in
-	 let delay_secs = float !delay /. 1000. in
-	 if end_time <= time +. delay_secs then quit := true
-    );
-
-    (* Batch mode or script mode.  We didn't call get_key_press above, so
-     * we didn't sleep.  Sleep now, unless we are about to quit.
+    (* End time?  We might need to adjust the precise delay down if
+     * the delay would be longer than the end time (RHBZ#637964).  Note
+     * 'delay' is in milliseconds.
      *)
-    if batch_mode || script_mode then
-      if not !quit then
-	usleep !delay;
+    let delay =
+      match !end_time with
+      | None ->
+          (* No --end-time option, so use the current delay. *)
+          !delay
+      | Some end_time ->
+	  let (_, time, _, _, _, _, _, _) = state in
+	  let delay_secs = float !delay /. 1000. in
+	  if end_time <= time +. delay_secs then (
+            quit := true;
+            let delay = int_of_float (1000. *. (end_time -. time)) in
+            if delay >= 0 then delay else 0
+          ) else
+            !delay in
+    (*eprintf "adjusted delay = %d\n%!" delay;*)
+
+    (* Get next key.  This does the sleep. *)
+    if not batch_mode && not script_mode && not stream_mode then
+      get_key_press setup delay
+    else (
+      (* Batch mode, script mode, stream mode.  We didn't call
+       * get_key_press, so we didn't sleep.  Sleep now, unless we are
+       * about to quit.
+       *)
+      if not !quit || !end_time <> None then
+	millisleep delay
+    )
   done
 
-and get_key_press setup =
-  (* Read the next key, waiting up to !delay milliseconds. *)
-  timeout !delay;
+and get_key_press setup delay =
+  (* Read the next key, waiting up to 'delay' milliseconds. *)
+  timeout delay;
   let k = getch () in
   timeout (-1); (* Reset to blocking mode. *)
 
@@ -1327,6 +1448,7 @@ and get_key_press setup =
     else if k = Char.code '2' then toggle_net_display ()
     else if k = Char.code '3' then toggle_block_display ()
     else if k = Char.code 'W' then write_init_file ()
+    else if k = Char.code 'B' then toggle_block_in_bytes_mode ()
     else unknown_command k
   )
 
@@ -1472,6 +1594,12 @@ and toggle_block_display () =		(* key 3 *)
     | TaskDisplay | NetDisplay -> BlockDisplay
     | BlockDisplay -> TaskDisplay
 
+and toggle_block_in_bytes_mode () =      (* key B *)
+  block_in_bytes :=
+    match !block_in_bytes with
+    | false -> true
+    | true  -> false
+
 (* Write an init file. *)
 and write_init_file () =
   match !init_file with
@@ -1549,7 +1677,7 @@ and _write_init_file filename =
       refresh ();
       sleep 2
 
-and show_help (_, _, _, _, _, hostname,
+and show_help (_, _, _, _, _, _, hostname,
 	       (libvirt_major, libvirt_minor, libvirt_release)) =
   clear ();
 
@@ -1600,6 +1728,7 @@ and show_help (_, _, _, _, _, hostname,
   key "q"        (s_"Quit");
   key "d s"      (s_"Set update interval");
   key "h"        (s_"Help");
+  key "B"        (s_"toggle block info req/bytes");
 
   (* Sort order. *)
   ignore (get_lineno ());
