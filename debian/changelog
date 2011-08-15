@@ -1,3 +1,13 @@
+virt-top (1.0.6-1) unstable; urgency=low
+
+  * [7c3e6a1] Imported Upstream version 1.0.6
+  * [f0a771b] Redo patch
+  * [6629856] Bump Standards-Version to 3.9.2
+  * [930eafd] New patch 0002-Ensure-manpages-get-built-when-using-native-
+    compiler.patch
+
+ -- Laurent Léonard <laurent@open-minds.org>  Mon, 15 Aug 2011 23:19:06 +0200
+
 virt-top (1.0.5-1) unstable; urgency=low
 
   * [ba445bb] Imported Upstream version 1.0.5
