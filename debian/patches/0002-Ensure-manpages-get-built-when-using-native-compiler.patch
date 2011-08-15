@@ -1,5 +1,5 @@
-From: =?UTF-8?q?Laurent=20L=C3=A9onard?= <laurent@open-minds.org>
-Date: Mon, 15 Aug 2011 22:58:10 +0200
+From: "Richard W.M. Jones" <rjones@redhat.com>
+Date: Mon, 15 Aug 2011 11:18:03 +0100
 Subject: =?UTF-8?q?Ensure=20manpages=20get=20built=20when=20using=20native=20?=
  =?UTF-8?q?compiler=20(thanks=20Laurent=20L=C3=A9onard).?=
 MIME-Version: 1.0
