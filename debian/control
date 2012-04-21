@@ -1,8 +1,8 @@
 Source: virt-top
 Section: admin
 Priority: extra
-Maintainer: Guido Günther <agx@sigxcpu.org>
-Uploaders: Laurent Léonard <laurent@open-minds.org>
+Maintainer: Debian Libvirt Maintainers <pkg-libvirt-maintainers@lists.alioth.debian.org>
+Uploaders: Guido Günther <agx@sigxcpu.org>, Laurent Léonard <laurent@open-minds.org>
 Build-Depends: cdbs, 
  debhelper (>= 7), 
  autotools-dev, 
