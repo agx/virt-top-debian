@@ -1,0 +1,8 @@
+config.guess
+config.guess.cdbs-orig
+config.sub
+config.sub.cdbs-orig
+Make.rules
+po/Makefile
+virt-top/virt_top_gettext.ml
+virt-top/virt_top_version.ml

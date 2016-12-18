@@ -1,0 +1,2 @@
+# The following lintian is caused by ocaml-gettext. Please, see #848619.
+virt-top: spelling-error-in-binary usr/bin/virt-top approriate appropriate

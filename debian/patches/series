@@ -1,1 +1,2 @@
-0001-add-opt-and-byte-compile-targets.patch
+10_add-opt-and-byte-compile-targets.patch
+20_fix-FTBFS-with-OCaml.patch

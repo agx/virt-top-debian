@@ -1,33 +1,32 @@
 Source: virt-top
 Section: admin
-Priority: extra
+Priority: optional
 Maintainer: Debian Libvirt Maintainers <pkg-libvirt-maintainers@lists.alioth.debian.org>
-Uploaders: Guido Günther <agx@sigxcpu.org>, Laurent Léonard <laurent@open-minds.org>
-Build-Depends: cdbs, 
- debhelper (>= 7), 
- autotools-dev, 
- ocaml-nox, 
- ocaml-findlib, 
- quilt,
- libvirt-ocaml-dev (>= 0.6.1.1), 
- libcurses-ocaml-dev, 
- libcsv-ocaml-dev, 
- libgettext-ocaml-dev, 
- libxml-light-ocaml-dev,
- dh-ocaml (>= 0.9.1),
- libextlib-ocaml-dev
-Standards-Version: 3.9.3
-Vcs-Git: git://git.debian.org/pkg-ocaml-maint/packages/virt-top.git
-Vcs-Browser: http://git.debian.org/?p=pkg-ocaml-maint/packages/virt-top.git
-Homepage: http://et.redhat.com/~rjones/virt-top/
-DM-Upload-Allowed: yes
+Uploaders: Guido Guenther <agx@debian.org>,
+           Joao Eriberto Mota Filho <eriberto@debian.org>
+Build-Depends: debhelper (>= 10),
+               dh-autoreconf,
+               dh-ocaml,
+               libcsv-ocaml-dev,
+               libcurses-ocaml-dev,
+               libextlib-ocaml-dev,
+               libgettext-ocaml-dev,
+               libvirt-ocaml-dev (>= 0.6.1.4),
+               libxml-light-ocaml-dev,
+               ocaml-findlib,
+               ocaml-nox
+Standards-Version: 3.9.8
+Vcs-Git: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
+Vcs-Browser: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
+Homepage: http://people.redhat.com/~rjones/virt-top
 
 Package: virt-top
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, ${ocaml:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: show stats of virtualized domains
- virt-top is modelled after the "ordinary" top utility and many keys and
- command line options are the same.
+ virt-top is a top-like utility for showing stats of virtualized domains. Many
+ keys and command line options are the same as for ordinary top.
  .
- It uses libvirt so it capable of showing stats across a variety of
- different virtualization systems.
+ It uses libvirt so it capable of showing stats across a variety of different
+ virtualization systems (virtual machines or VM). Some supported systems are
+ KVM, XEN and QEMU.

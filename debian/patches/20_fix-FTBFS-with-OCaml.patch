@@ -1,0 +1,21 @@
+Description: fix a FTBFS with OCaml 4.02.2. (Closes: #789614)
+Author: Joao Eriberto Mota Filho <eriberto@debian.org>
+Last-Update: 2016-01-01
+Index: virt-top-1.0.7/virt-top/Makefile.in
+===================================================================
+--- virt-top-1.0.7.orig/virt-top/Makefile.in
++++ virt-top-1.0.7/virt-top/Makefile.in
+@@ -64,11 +64,11 @@ OBJS		+= virt_top_main.cmo
+ 
+ XOBJS		:= $(OBJS:.cmo=.cmx)
+ 
+-OCAMLCFLAGS	:= -g -warn-error A
++OCAMLCFLAGS	:= -g
+ OCAMLCLIBS	:= -linkpkg
+ 
+ OCAMLOPTPACKAGES := $(OCAMLCPACKAGES)
+-OCAMLOPTFLAGS	:= -warn-error A
++OCAMLOPTFLAGS	:=
+ OCAMLOPTLIBS	:= $(OCAMLCLIBS)
+ 
+ BYTE_TARGETS	:= virt-top

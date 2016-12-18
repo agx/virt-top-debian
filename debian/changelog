@@ -1,3 +1,49 @@
+virt-top (1.0.8-1) unstable; urgency=medium
+
+  * New upstream release.
+  * New co-maintainer.
+  * Ack for NMUs. (Closes: #789614, #809681)
+  * Migrations:
+      - debian/copyright to 1.0 format.
+      - debian/rules to (new) reduced format.
+      - DebSrc to 3.0.
+      - DH level to 10.
+      - Dropped CDBS.
+      - Using dh-autoreconf now.
+  * debian/clean: added to remove some files forgotten after the clean process.
+  * debian/control:
+      - Bumped relationship minimum version for libvirt-ocaml-dev to
+        '>= 0.6.1.4', needed by virt-top 1.0.8.
+      - Bumped Standards-Version to 3.9.8.
+      - Changed Priority from extra to optional.
+      - Improved the long description.
+      - Removed deprecated field DM-Upload-Allowed.
+      - Removed a MIA co-maintainer.
+      - Removed the unneeded minimal version from relationship for dh-ocaml
+        build dependency, because all current versions in Debian, since
+        old-old-stable, are newer.
+      - Removed the unneeded variable ${ocaml:Depends} from the binary.
+      - Updated the Vcs-* fields.
+  * debian/docs: added to install the TODO file.
+  * debian/install: created to install the main binary.
+  * debian/lintian-overrides: created to override a false positive.
+  * debian/README.source: obsolete. Removed.
+  * debian/watch: bumped to version 4.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sun, 18 Dec 2016 00:43:49 -0200
+
+virt-top (1.0.7-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Added the debian/patches/0005-fix-FTBFS-with-OCaml.patch to fix a FTBFS
+      with OCaml 4.02.2. Thanks to Stéphane Glondu <glondu@debian.org>.
+      (Closes: #789614)
+  * Bumped Standards-Version to 3.9.6.
+  * New upstream homepage. (Closes: #809681)
+  * Updated the debian/watch file to use the new upstream source place.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sat, 02 Jan 2016 16:25:03 -0200
+
 virt-top (1.0.7-1) unstable; urgency=low
 
   * [01344ee] Imported Upstream version 1.0.7
