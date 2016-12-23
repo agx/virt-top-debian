@@ -200,7 +200,8 @@ let start_up () =
     "-n", Arg.Set_int iterations,
       "iterations " ^ s_"Number of iterations to run";
     "-o", Arg.String set_sort,
-      "sort " ^ sprintf (f_"Set sort order (%s)") "cpu|mem|time|id|name";
+      "sort " ^ sprintf (f_"Set sort order (%s)")
+        "cpu|mem|time|id|name|netrx|nettx|blockrdrq|blockwrrq";
     "-s", Arg.Set secure_mode,
       " " ^ s_"Secure (\"kiosk\") mode";
     "--script", Arg.Set script_mode,
@@ -225,6 +226,24 @@ OPTIONS" in
   (* Read the init file. *)
   let try_to_read_init_file filename =
     let config = read_config_file filename in
+    (* Replacement functions that raise better errors when
+     * parsing the init file.
+     *)
+    let int_of_string s =
+      try int_of_string s
+      with Invalid_argument _ ->
+        failwithf (f_"%s: could not parse '%s' in init file: expecting an integer")
+          filename s in
+    let float_of_string s =
+      try float_of_string s
+      with Invalid_argument _ ->
+        failwithf (f_"%s: could not parse '%s' in init file: expecting a number")
+          filename s in
+    let bool_of_string s =
+      try bool_of_string s
+      with Invalid_argument _ ->
+        failwithf (f_"%s: could not parse '%s' in init file: expecting %s")
+          filename s "true|false" in
     List.iter (
       function
       | _, "display", mode -> display_mode := display_of_cli mode
@@ -652,12 +671,30 @@ let collect, clear_pcpu_display_data =
 	      (try
 		 let domid = rd.rd_domid in
 		 let maplen = C.cpumaplen nr_pcpus in
-		 let cpu_stats = D.get_cpu_stats rd.rd_dom nr_pcpus in
-		 let rec find_usages_from_stats = function
-		   | ("cpu_time", D.TypedFieldUInt64 usages) :: _ -> usages
-		   | _ :: params -> find_usages_from_stats params
-		   | [] -> 0L in
-		 let pcpu_usages = Array.map find_usages_from_stats cpu_stats in
+		 let cpu_stats = D.get_cpu_stats rd.rd_dom in
+
+                 (* Note the terminology is confusing.
+                  *
+                  * In libvirt, cpu_time is the total time (hypervisor + vCPU).
+                  * vcpu_time is the time only taken by the vCPU,
+                  * excluding time taken inside the hypervisor.
+                  *
+                  * For each pCPU, libvirt may return either "cpu_time"
+                  * or "vcpu_time" or neither or both.  This function
+                  * returns an array pair [|cpu_time, vcpu_time|];
+                  * if either is missing it is returned as 0.
+                  *)
+		 let find_cpu_usages params =
+                   let rec find_uint64_field name = function
+                     | (n, D.TypedFieldUInt64 usage) :: _ when n = name -> usage
+                     | _ :: params -> find_uint64_field name params
+                     | [] -> 0L
+                   in
+                   [| find_uint64_field "cpu_time" params;
+                      find_uint64_field "vcpu_time" params |]
+                 in
+
+		 let pcpu_usages = Array.map find_cpu_usages cpu_stats in
 		 let maxinfo = rd.rd_info.D.nr_virt_cpu in
 		 let nr_vcpus, vcpu_infos, cpumaps =
 		   D.get_vcpus rd.rd_dom maxinfo maplen in
@@ -685,25 +722,32 @@ let collect, clear_pcpu_display_data =
 
 	(* Rearrange the data into a matrix.  Major axis (down) is
 	 * pCPUs.  Minor axis (right) is domains.  At each node we store:
-	 *  cpu_time (on this pCPU only, nanosecs),
+	 *  cpu_time hypervisor + domain (on this pCPU only, nanosecs),
+	 *  vcpu_time domain only (on this pCPU only, nanosecs).
 	 *)
-	let pcpus = Array.make_matrix nr_pcpus nr_doms 0L in
+        let make_3d_array dimx dimy dimz e =
+          Array.init dimx (fun _ -> Array.make_matrix dimy dimz e)
+        in
+	let pcpus = make_3d_array nr_pcpus nr_doms 2 0L in
 
 	List.iteri (
 	  fun di (domid, name, nr_vcpus, vcpu_infos, pcpu_usages,
 		  prev_pcpu_usages, cpumaps, maplen) ->
 	    (* Which pCPUs can this dom run on? *)
 	    for p = 0 to Array.length pcpu_usages - 1 do
-	      pcpus.(p).(di) <- pcpu_usages.(p) -^ prev_pcpu_usages.(p)
-	    done
+	      pcpus.(p).(di).(0) <-
+                pcpu_usages.(p).(0) -^ prev_pcpu_usages.(p).(0);
+	      pcpus.(p).(di).(1) <-
+                pcpu_usages.(p).(1) -^ prev_pcpu_usages.(p).(1)
+            done
 	) doms;
 
-	(* Sum the CPU time used by each pCPU, for the %CPU column. *)
+	(* Sum the total CPU time used by each pCPU, for the %CPU column. *)
 	let pcpus_cpu_time = Array.map (
 	  fun row ->
 	    let cpu_time = ref 0L in
 	    for di = 0 to Array.length row-1 do
-	      let t = row.(di) in
+	      let t = row.(di).(0) in
 	      cpu_time := !cpu_time +^ t
 	    done;
 	    Int64.to_float !cpu_time
@@ -924,7 +968,7 @@ let redraw =
 	     List.map (
 	       fun (_, name, _, _, _, _, _, _) ->
 		 let len = String.length name in
-		 let width = max (len+1) 7 in
+		 let width = max (len+1) 12 in
 		 pad width name
 	     ) doms
 	   ) in
@@ -942,17 +986,27 @@ let redraw =
 
 	     List.iteri (
 	       fun di (domid, name, _, _, _, _, _, _) ->
-		 let t = pcpus.(p).(di) in
+		 let t = pcpus.(p).(di).(0) in (* hypervisor + domain *)
+		 let t_only = pcpus.(p).(di).(1) in (* domain only *)
 		 let len = String.length name in
-		 let width = max (len+1) 7 in
-		 let str =
+		 let width = max (len+1) 12 in
+		 let str_t =
 		   if t <= 0L then ""
 		   else (
 		     let t = Int64.to_float t in
 		     let percent = 100. *. t /. total_cpu_per_pcpu in
-		     sprintf "%s " (Show.percent percent)
+		     Show.percent percent
 		   ) in
-		 addstr (pad width str);
+                 let str_t_only =
+                    if t_only <= 0L then ""
+                    else (
+                      let t_only = Int64.to_float t_only in
+                      let percent = 100. *. t_only /. total_cpu_per_pcpu in
+                      Show.percent percent
+                    ) in
+                 addstr (pad 5 str_t);
+                 addstr (pad 5 str_t_only);
+                 addstr (pad (width-10) " ");
 		 ()
 	     ) doms
 	 ) pcpus;

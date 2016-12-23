@@ -13,9 +13,14 @@ DESCRIPTION
     different virtualization systems.
 
 OPTIONS
-    -1  Display physical CPUs by default (instead of domains). When virt-top
-        is running, use the *1* key to toggle between physical CPUs and
-        domains display.
+    -1  Display physical CPUs by default (instead of domains).
+
+        Under each domain column, two numbers are shown. The first is the
+        percentage of the physical CPU used by the domain and the hypervisor
+        together. The second is the percentage used by just the domain.
+
+        When virt-top is running, use the *1* key to toggle between physical
+        CPUs and domains display.
 
     -2  Display network interfaces by default (instead of domains). When
         virt-top is running, use the *2* key to toggle between network
@@ -297,6 +302,71 @@ INIT FILE
     file override options specified on the command line. This is a bug and
     this behaviour may change in the future.
 
+COLUMN HEADINGS
+    %CPU
+        Percentage of CPU used. As with top(1), 100% means that all physical
+        CPUs are being fully used.
+
+    DEVICE
+        The block device name.
+
+    DOMAIN
+    NAME
+        The name of the libvirt domain.
+
+    ID  The libvirt domain ID.
+
+    INTERFACE
+        The network interface name.
+
+    %MEM
+        The percentage of host memory assigned to the guest.
+
+    PHYCPU
+        The physical CPU.
+
+    RDBY
+        Disk bytes read since last displayed.
+
+    RDRQ
+        Disk read requests since last displayed.
+
+    RXBY
+        Network bytes received since last displayed.
+
+    RXPK
+        Network packets received since last displayed.
+
+    S   The state of the domain, one of:
+
+        ?   Unknown.
+
+        R   Running.
+
+        S   Blocked.
+
+        P   Paused.
+
+        D
+        O   Shutdown.
+
+        X   Crashed.
+
+    TIME
+        Total CPU time used.
+
+    TXBY
+        Network bytes transmitted since last displayed.
+
+    TXPK
+        Network packets transmitted since last displayed.
+
+    WRBY
+        Disk bytes written since last displayed.
+
+    WRRQ
+        Disk write requests since last displayed.
+
 NOTES
   Block I/O statistics
     This I/O value is the amount of I/O since the previous iteration of
@@ -337,7 +407,7 @@ AUTHORS
     Richard W.M. Jones <rjones @ redhat . com>
 
 COPYRIGHT
-    (C) Copyright 2007-2011 Red Hat Inc., Richard W.M. Jones
+    (C) Copyright 2007-2012 Red Hat Inc., Richard W.M. Jones
     http://libvirt.org/
 
     This program is free software; you can redistribute it and/or modify it
