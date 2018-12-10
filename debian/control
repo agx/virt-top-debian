@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian Libvirt Maintainers <pkg-libvirt-maintainers@lists.alioth.debian.org>
 Uploaders: Guido Guenther <agx@debian.org>,
            Joao Eriberto Mota Filho <eriberto@debian.org>
-Build-Depends: debhelper (>= 10),
+Build-Depends: debhelper (>= 11),
                dh-autoreconf,
                dh-ocaml,
                libcsv-ocaml-dev,
