@@ -2,8 +2,7 @@ Source: virt-top
 Section: admin
 Priority: optional
 Maintainer: Debian Libvirt Maintainers <pkg-libvirt-maintainers@lists.alioth.debian.org>
-Uploaders: Guido Guenther <agx@debian.org>,
-           Joao Eriberto Mota Filho <eriberto@debian.org>
+Uploaders: Guido Guenther <agx@debian.org>
 Build-Depends: debhelper (>= 11),
                dh-ocaml,
                libcsv-ocaml-dev,

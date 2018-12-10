@@ -4,6 +4,7 @@ virt-top (1.0.8-2) unstable; urgency=medium
   * debian/control:
       - Bumped Standards-Version to 4.2.1.
       - Changed Vcs-* URLs to salsa.debian.org.
+      - Removed myself from Uploaders field.
       - Removed no longer needed build dependency dh-autoreconf.
   * debian/copyright:
       - Updated packaging copyright years.
