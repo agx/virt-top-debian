@@ -3,6 +3,7 @@ virt-top (1.0.8-2) unstable; urgency=medium
   * Migrated DH level to 11.
   * debian/control:
       - Bumped Standards-Version to 4.2.1.
+      - Removed no longer needed build dependency dh-autoreconf.
   * debian/copyright:
       - Updated packaging copyright years.
       - Using a secure URI in Format field.
