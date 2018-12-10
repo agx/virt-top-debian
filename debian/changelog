@@ -8,6 +8,7 @@ virt-top (1.0.8-2) unstable; urgency=medium
   * debian/copyright:
       - Updated packaging copyright years.
       - Using a secure URI in Format field.
+  * debian/watch: using https protocol.
 
  -- Joao Eriberto Mota Filho <eriberto@debian.org>  Wed, 05 Dec 2018 23:28:58 -0200
 
