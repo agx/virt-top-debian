@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Virt-top
 Upstream-Contact: Richard W.M. Jones <rjones@redhat.com>
 Source: https://people.redhat.com/~rjones/virt-top
@@ -12,7 +12,7 @@ Files: debian/*
 Copyright: 2008-2009 Guido Guenther <agx@debian.org>
            2009      Sylvain Le Gall <gildor@debian.org>
            2009-2012 Laurent Léonard <laurent@open-minds.org>
-           2016      Joao Eriberto Mota Filho <eriberto@debian.org>
+           2016-2018 Joao Eriberto Mota Filho <eriberto@debian.org>
 License: GPL-2+
 
 License: GPL-2+
