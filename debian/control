@@ -15,8 +15,8 @@ Build-Depends: debhelper (>= 11),
                ocaml-findlib,
                ocaml-nox
 Standards-Version: 4.2.1
-Vcs-Git: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
-Vcs-Browser: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
+Vcs-Git: https://salsa.debian.org/libvirt-team/virt-top.git
+Vcs-Browser: https://salsa.debian.org/libvirt-team/virt-top
 Homepage: http://people.redhat.com/~rjones/virt-top
 
 Package: virt-top
