@@ -1,2 +1,2 @@
 version=4
-http://people.redhat.com/~rjones/virt-top/files/virt-top-(\d\S+)\.tar\.(?:bz2|gz|xz)
+https://people.redhat.com/~rjones/virt-top/files/virt-top-(\d\S+)\.tar\.(?:bz2|gz|xz)

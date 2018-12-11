@@ -1,3 +1,20 @@
+virt-top (1.0.8-2) unstable; urgency=medium
+
+  * Migrated DH level to 11.
+  * debian/control:
+      - Bumped Standards-Version to 4.2.1.
+      - Changed Vcs-* URLs to salsa.debian.org.
+      - Removed myself from Uploaders field.
+      - Removed no longer needed build dependency dh-autoreconf.
+  * debian/copyright:
+      - Updated packaging copyright years.
+      - Using a secure URI in Format field.
+  * debian/lintian-overrides: removed because bug number #848619 was fixed.
+  * debian/tests/control: created to perform a trivial test.
+  * debian/watch: using https protocol.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Wed, 05 Dec 2018 23:28:58 -0200
+
 virt-top (1.0.8-1) unstable; urgency=medium
 
   * New upstream release.
@@ -85,7 +102,7 @@ virt-top (1.0.4-2) unstable; urgency=low
 virt-top (1.0.4-1) unstable; urgency=low
 
   [ Sylvain Le Gall ]
-  * New upstream release 
+  * New upstream release
   * Use dh-ocaml features
 
   [ Laurent Léonard ]
@@ -125,4 +142,3 @@ virt-top (1.0.1-1) unstable; urgency=low
   * Initial release (Closes: #453955)
 
  -- Guido Guenther <agx@sigxcpu.org>  Fri, 27 Jun 2008 19:51:55 +0200
-

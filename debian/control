@@ -2,10 +2,8 @@ Source: virt-top
 Section: admin
 Priority: optional
 Maintainer: Debian Libvirt Maintainers <pkg-libvirt-maintainers@lists.alioth.debian.org>
-Uploaders: Guido Guenther <agx@debian.org>,
-           Joao Eriberto Mota Filho <eriberto@debian.org>
-Build-Depends: debhelper (>= 10),
-               dh-autoreconf,
+Uploaders: Guido Guenther <agx@debian.org>
+Build-Depends: debhelper (>= 11),
                dh-ocaml,
                libcsv-ocaml-dev,
                libcurses-ocaml-dev,
@@ -15,9 +13,9 @@ Build-Depends: debhelper (>= 10),
                libxml-light-ocaml-dev,
                ocaml-findlib,
                ocaml-nox
-Standards-Version: 3.9.8
-Vcs-Git: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
-Vcs-Browser: https://anonscm.debian.org/git/pkg-ocaml-maint/packages/virt-top.git
+Standards-Version: 4.2.1
+Vcs-Git: https://salsa.debian.org/libvirt-team/virt-top.git
+Vcs-Browser: https://salsa.debian.org/libvirt-team/virt-top
 Homepage: http://people.redhat.com/~rjones/virt-top
 
 Package: virt-top
